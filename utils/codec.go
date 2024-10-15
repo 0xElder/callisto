@@ -6,6 +6,8 @@ import (
 	"cosmossdk.io/x/evidence"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
 	"cosmossdk.io/x/upgrade"
+	registration "github.com/0xElder/elder/x/registration/module"
+	router "github.com/0xElder/elder/x/router/module"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
@@ -70,6 +72,8 @@ func getBasicManagers() module.BasicManager {
 		groupmodule.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		consensus.AppModuleBasic{},
+		router.AppModuleBasic{},
+		registration.AppModuleBasic{},
 	)
 }
 
