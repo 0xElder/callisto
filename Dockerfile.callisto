@@ -1,0 +1,41 @@
+# Stage 1: Build the Go binary
+FROM golang:1.23-alpine AS builder
+
+# Install git and other necessary packages
+RUN apk update && apk add --no-cache make git
+
+# Set environment variables for Go
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
+# Set the working directory inside the container
+ENV APP_HOME=/home/app
+
+WORKDIR $APP_HOME
+
+ARG GH_TOKEN
+# Set up git to use the token for private repos
+RUN git config --global url."https://${GH_TOKEN}:@github.com/".insteadOf "https://github.com/"
+
+# Copy go.mod and go.sum files first to cache dependencies
+COPY . ${APP_HOME}/callisto
+COPY ./genesis.json ${APP_HOME}/genesis.json
+
+WORKDIR $APP_HOME/callisto
+
+# Build the Go application
+RUN make build
+
+# # Stage 2: Create a lightweight image to run the Go app
+FROM alpine:3.20
+
+# Install gettext for envsubst
+RUN apk add --no-cache gettext
+
+COPY --from=builder /home/app/callisto/build/callisto /usr/bin/callisto
+COPY --from=builder /home/app/genesis.json /root/.callisto/genesis.json
+COPY ./callisto-config.yaml /root/.callisto/callisto-config.yaml
+
+# Run the Go binary
+CMD ["sh", "-c", "envsubst < /root/.callisto/callisto-config.yaml > /root/.callisto/config.yaml && callisto parse genesis-file --genesis-file-path /root/.callisto/genesis.json && callisto start --home /root/.callisto"]

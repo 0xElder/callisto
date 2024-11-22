@@ -30,4 +30,18 @@ This will:
 1. Create a Docker container running a PostgreSQL database.
 2. Run all the tests using that database as support.
 
+## Elder
+To run explorer for elder, you can do so by running
+
+```shell
+    cp .example.env .env
+    # update .env to put in the required vars
+    docker compose up
+```
+
+**Note**: Requires [Docker](https://docker.com).
+
+This will:
+1. Create a Docker container running a PostgreSQL database.
+2. Runs callisto indexer and hasura in Docker container.
 

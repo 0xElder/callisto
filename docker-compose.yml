@@ -1,26 +1,51 @@
-version: '3.6'
 services:
-  hasura:
-    image: hasura/graphql-engine:v2.0.4
-    ports:
-    - "8080:8080"
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     restart: always
-    environment:
-      ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
-      HASURA_GRAPHQL_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      ## enable the console served by server
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
-      ## enable debugging mode. It is recommended to disable this in production
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to set an admin secret
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks: 
+      - network-callisto
+    
   callisto:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.callisto
+      args:
+        GH_TOKEN: ${GH_TOKEN}
     restart: always
-    command: callisto parse --home /callisto/.callisto
     volumes:
-      ## Modify first path to match configuration file.
-      - /callisto/.callisto:/callisto/.callisto
+      - callisto:/callisto/.callisto
+    env_file:
+      - .env
+    networks: 
+      - network-callisto
+    depends_on:
+      - postgres
+  
+  hasura:
+    image: hasura/graphql-engine:v2.45.0-beta.1-ce.ubuntu
+    ports:
+      - "8080:8080"
+      - "3000:3000"
+    restart: always
+    environment:
+      ACTION_BASE_URL: "http://callisto:3000"
+    env_file:
+      - .env
+    networks: 
+      - network-callisto
+    depends_on:
+      - postgres
+      - callisto
+
+networks:
+  network-callisto:
+
+volumes:
+  callisto:
+  postgres:

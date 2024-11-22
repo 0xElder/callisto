@@ -1,0 +1,52 @@
+chain:
+    bech32_prefix: elder
+    modules: 
+        - modules
+        - messages
+        - auth
+        - bank
+        - consensus
+        - feegrant
+        - gov
+        - mint
+        - slashing
+        - staking
+        - distribution
+        - upgrade
+        - registration
+        - router
+node:
+    type: remote
+    config:
+        rpc:
+            client_name: elder
+            address: ${ELDER_RPC_URL}
+            max_connections: 20
+        grpc:
+            address: ${ELDER_GRPC_URL}
+            insecure: true
+        api:
+            address: ${ELDER_API_URL}
+parsing:
+    workers: 100
+    start_height: 1
+    average_block_time: 2s
+    listen_new_blocks: true
+    parse_old_blocks: true
+    parse_genesis: true
+database:
+    url: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable&search_path=public
+    max_open_connections: 10
+    max_idle_connections: 10
+    partition_size: 100000
+    partition_batch: 1000
+    ssl_mode_enable: "false"
+    ssl_root_cert: ""
+    ssl_cert: ""
+    ssl_key: ""
+logging:
+    level: debug
+    format: text
+actions:
+    host: 127.0.0.1
+    port: 3000

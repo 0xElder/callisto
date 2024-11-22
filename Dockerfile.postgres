@@ -1,0 +1,19 @@
+# Use the official PostgreSQL image
+FROM postgres:17
+
+RUN useradd --user-group --create-home --no-log-init --shell /bin/bash app
+ENV APP_HOME=/home/app
+
+WORKDIR $APP_HOME
+
+COPY ./database/schema $APP_HOME/schema
+
+# Initialize the database (if required)
+COPY ./postgres-entrypoint.sh /docker-entrypoint-initdb.d/
+
+# Ensure proper permissions
+RUN chown -R app:app /docker-entrypoint-initdb.d/postgres-entrypoint.sh
+
+RUN chmod +x /docker-entrypoint-initdb.d/postgres-entrypoint.sh
+
+CMD ["postgres"]
