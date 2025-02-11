@@ -1,13 +1,11 @@
 # Stage 1: Build the Go binary
-FROM golang:1.23-alpine AS builder
+FROM golang:1.22.11-alpine AS builder
 
 # Install git and other necessary packages
-RUN apk update && apk add --no-cache make git
+RUN apk update && apk add --no-cache make git build-base
 
 # Set environment variables for Go
-ENV CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+ENV LINK_STATICALLY=true
 
 # Set the working directory inside the container
 ENV APP_HOME=/home/app
